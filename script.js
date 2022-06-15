@@ -64,7 +64,7 @@ function createNodeCard(marker) {
     <form class="d-flex flex-row" id="timeSelect">
       <input class="form-control form-control-sm" type="text">
       <select class="form-select form-select-sm" aria-label="Small select">
-        <option selected="" value="none">No Time Limit<option>
+        <option selected value="n">No Time Limit</option>
         <option value="m">Minutes</option>
         <option value="h">Hours</option>
         <option value="d">Days</option>
