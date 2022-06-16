@@ -54,6 +54,7 @@ function initMap() {
 }
 
 function createNodeCard(marker) {
+
     let latlng = marker.getPosition();
     const outermostCard = document.createElement("div");
     outermostCard.classList.add("pointCard");
@@ -62,8 +63,8 @@ function createNodeCard(marker) {
       <h5>Point ${marker.getLabel()}</h5>
       <button id="removePointBtn" type="button" class="btn-close" aria-label="Close"></button>
     </div>
-    <p class="mb-0"><b>Lat:</b> ${latlng.lat()}</p>
-    <p><b>Lng:</b> ${latlng.lng()}</p>
+    <p class="mb-0"><b>Lat:</b> <span class="lat">${latlng.lat()}</span></p>
+    <p><b>Lng:</b> <span class="lng">${latlng.lng()}</span></p>
     <form class="d-flex flex-row" id="timeSelect">
         <select class="form-select form-select-sm" aria-label="Small select">
             <option selected value="n">No Time Limit</option>
@@ -142,6 +143,12 @@ function createNodeCard(marker) {
         } else {
             numericInput.style.display = "block";
         }
+    });
+
+    marker.addListener("dragend", ()=>{
+        let coords = marker.getPosition();
+        outermostCard.getElementsByClassName("lat")[0].innerHTML = coords.lat();
+        outermostCard.getElementsByClassName("lng")[0].innerHTML = coords.lng();
     })
 
     
