@@ -21,8 +21,8 @@
     <h1 class="p-3 fw-bolder m-3">Time Constraint Traveling Salesman Problem</h1>
     <div class="d-flex flex-row ms-3 p-3 pt-0 mt-0 gap-3">
       <button type="button" class="btn btn-lg btn-outline-primary">Solve</button>
-      <button type="button" class="btn btn-lg btn-outline-primary">Reset</button>
-      <button type="button" class="btn btn-lg btn-outline-info">Help</button>
+      <button type="button" class="btn btn-lg btn-outline-danger">Reset</button>
+      <button type="button" class="btn btn-lg btn-outline-info" onclick="console.log(nodes)">Help</button>
     </div>
     <div class="container-xl border border-primary" id="mainContainer">
       <div class="row fullHeight">
@@ -38,9 +38,10 @@
           </div>
         </div>
         
-        <!-- Main Script -->
+        <!-- Main Scripts -->
         <script src="label.js"></script>
         <script src="script.js"></script>
+        <script src="marker.js"></script>
 
   </body>
 </html>
