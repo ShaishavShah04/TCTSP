@@ -1,6 +1,9 @@
 // Global Varibles
 var nodes = [];
 const labelRetriever = new LabelRetriever();
+var distanceMatrix; 
+var memoizationHashMap = new Map();
+var finalRoute = []
 
 // Initialize and add the map
 function initMap() {
@@ -53,8 +56,112 @@ function initMap() {
 
 }
 
+window.initMap = initMap;
+
+
 function removeStartingTagFromAllNodes() {
     nodes.forEach((m) => m.setNotStartingNode());
 }
 
-window.initMap = initMap;
+function solve(response, status) {
+    if (status == 'OK') {
+
+        distanceMatrix = response;
+
+        let indexOfStartingNode = nodes.findIndex((n) => n.startingNode);
+        let setOfRemainingNodes = new Set(nodes.keys());
+        setOfRemainingNodes.delete(indexOfStartingNode);
+
+        let result = solveRecursiveHelper(indexOfStartingNode, setOfRemainingNodes);
+
+        console.log(memoizationHashMap);
+
+        traceRoute(indexOfStartingNode, setOfRemainingNodes);
+
+        console.log(finalRoute);
+    }
+}
+
+function solveRecursiveHelper(startingNodeIndex, remainingNodes) {
+    
+    // Logging
+    console.log("Solving for:", startingNodeIndex, remainingNodes);
+
+    // If we somehow end up calling this function with zero remaining nodes
+    if (!remainingNodes.size) {
+        console.log("Called with 0 nodes!")
+        return 0;
+    }
+
+    // If we are only having 2 node, don't do any calculations of minimum.
+    if (remainingNodes.size == 1) {
+        let d = distanceMatrix.rows[startingNodeIndex].elements[remainingNodes.values().next().value].duration.value;
+        console.log("Distance determined to be ", d);
+        return d;
+    }
+
+    let min = Number.MAX_SAFE_INTEGER;
+    let nextNode;
+
+    remainingNodes.forEach((value)=>{
+        let distanceFromStartingNode = distanceMatrix.rows[startingNodeIndex].elements[value].duration.value;
+        let remainingNodesForRecursion = new Set([...remainingNodes]);
+        remainingNodesForRecursion.delete(value);
+        let distanceComputedRecursively = solveRecursiveHelper(value, remainingNodesForRecursion);
+        
+        let totalDistance = distanceComputedRecursively + distanceFromStartingNode;
+
+        if (totalDistance < min) {
+            min = totalDistance;
+            nextNode = value;
+        }
+    });
+
+    memoizationHashMap.set({
+        from: startingNodeIndex,
+        to: remainingNodes
+    }, nextNode);
+
+    return min;
+}
+
+// This function will append the correct remaing node to the order
+function traceRoute(startingNode, remainingNodes) {
+
+    if (remainingNodes.size == 1) {
+        finalRoute.push(remainingNodes.values().next().value);
+        return;
+    }
+
+    let mapKey = {
+        from: startingNode,
+        to: remainingNodes
+    };
+
+    console.log(mapKey);
+
+    let nextNodeToVisit = memoizationHashMap.forEach((v, k)=>{
+        console.log(k == mapKey, k.to == mapKey.to, k.from == mapKey.from);
+    });
+
+    console.log(startingNode, nextNodeToVisit);
+
+    finalRoute.push(nextNodeToVisit);
+    remainingNodes.delete(nextNodeToVisit);
+    // traceRoute(nextNodeToVisit, remainingNodes);
+}
+
+function getDistanceMatrix() {
+    let latLngOfNodes = nodes.map(n => n.getPosition());
+    let service = new google.maps.DistanceMatrixService();
+
+    service.getDistanceMatrix({
+        origins: latLngOfNodes,
+        destinations: latLngOfNodes,
+        travelMode: 'DRIVING',
+        drivingOptions: {
+            departureTime: new Date(),
+            trafficModel: 'optimistic'
+        }
+    }, solve);
+}
